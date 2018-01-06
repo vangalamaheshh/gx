@@ -12,7 +12,7 @@ import json
 import os
 from py2neo import Graph, Node
 
-graph = Graph(host = "neo4j", user = "neo4j", password = os.getenv("NEO4J_PASSWORD")
+graph = Graph(host = "neo4j", user = "neo4j", password = os.getenv("NEO4J_PASSWORD"))
 #------------------------#
 #    Flask methods       #
 #------------------------#
