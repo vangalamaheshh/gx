@@ -21,12 +21,12 @@ RUN set -ex \
 ENV NGINX_MAX_UPLOAD 0
 
 # Which uWSGI .ini file should be used, to make it customizable
-ENV UWSGI_INI /usr/local/bin/gx/uwsgi.ini
+ENV UWSGI_INI /usr/local/bin/gx/web-api/uwsgi.ini
 # URL under which static (not modified by Python) files will be requested
 # They will be served by Nginx directly, without being handled by uWSGI
 ENV STATIC_URL /static
 # Absolute path in where the static files wil be
-ENV STATIC_PATH /usr/local/bin/gx/static
+ENV STATIC_PATH /usr/local/bin/gx/web-api/static
 # If STATIC_INDEX is 1, serve / with /static/index.html directly (or the static URL configured)
 # ENV STATIC_INDEX 1
 ENV STATIC_INDEX 0
@@ -36,6 +36,6 @@ RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 
-WORKDIR /usr/local/bin/gx
+WORKDIR /usr/local/bin/gx/web-api
 
 CMD ["/usr/bin/supervisord"]

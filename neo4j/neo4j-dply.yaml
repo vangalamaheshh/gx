@@ -1,0 +1,29 @@
+apiVersion: apps/v1beta1 # for versions before 1.6.0 use extensions/v1beta1
+kind: Deployment
+metadata:
+  name: neo4j
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: neo4j
+    spec:
+      containers:
+      - name: neo4j
+        image: docker.io/neo4j:3.3.1
+        env:
+        - name: NEO4J_AUTH
+          value: neo4j/graphdb
+        ports:
+        - containerPort: 7474
+        - containerPort: 7687
+        - containerPort: 7473
+        volumeMounts:
+        - mountPath: /data
+          name: neo4j-volume
+      volumes:
+      - name: neo4j-volume
+        gcePersistentDisk:
+          pdName: neo4j-disk
+          fsType: ext4
