@@ -18,7 +18,7 @@ def authenticate(email, password):
   result = requests.post(url, data = json.dumps({
     "email": email
   }))
-  result_dict = json.loads(result)
+  result_dict = json.loads(result.text)
   if not result_dict["error"] and safe_str_cmp(result_dict["data"]["password"].encode('utf-8'), password.encode('utf-8')):
     return result_dict["data"]["email"]
 
@@ -57,13 +57,13 @@ def create_user():
     "email": email,
     "password": password
   }))
-  result_dict = json.loads(result)
+  result_dict = json.loads(result.text)
   if result_dict["error"]:
     return result
   else:
     return requests.post("http://localhost/auth", data = json.dumps({
       "email": email,
       "password": password
-    }))
+    }), headers = {"Content-Type": "application/json"})
 
 

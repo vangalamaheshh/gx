@@ -55,7 +55,7 @@ def create_user():
 def get_user():
   data = request.get_json(force = True)
   email = data["email"]
-  results = graph.run("MATCH (a:Person {email: {email}}) return a", {"email": email}).data()
+  results = graph.run("MATCH (a:User {email: {email}}) return a", {"email": email}).data()
   if results:
     return json.dumps({
       "error": None,
