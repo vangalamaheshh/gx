@@ -11,32 +11,22 @@ from flask import Flask, request
 from flask_jwt import JWT, jwt_required, current_identity
 from werkzeug.security import safe_str_cmp
 import json
+import requests
 
-class User(object):
-  def __init__(self, id, username, password):
-    self.id = id
-    self.username = username
-    self.password = password
+@jwt.authentication_handler
+def authenticate(email, password):
+  url = "http://graph-api/GetUser"
+  result = requests.post(url, data = json.dumps({
+    "email": email
+  }))
+  result_dict = json.loads(result)
+  if not result_dict["error"] and safe_str_cmp(result_dict["data"]["password"].encode('utf-8'), password.encode('utf-8')):
+    return result_dict["data"]["email"]
 
-  def __str__(self):
-    return "User(id='%s')" % self.id
-
-users = [
-    User(1, 'user1', 'abcxyz'),
-    User(2, 'user2', 'abcxyz'),
-]
-
-username_table = {u.username: u for u in users}
-userid_table = {u.id: u for u in users}
-
-def authenticate(username, password):
-  user = username_table.get(username, None)
-  if user and safe_str_cmp(user.password.encode('utf-8'), password.encode('utf-8')):
-    return user
-
+@jwt.identity_handler
 def identity(payload):
-  user_id = payload['identity']
-  return userid_table.get(user_id, None)
+  email = payload['identity']
+  return {"email": email}
 
 #------------------------#
 #    Flask methods       #
@@ -44,6 +34,7 @@ def identity(payload):
 app = Flask(__name__)
 app.debug = True
 app.config['SECRET_KEY'] = 'super-secret'
+JWT_AUTH_USERNAME_KEY = "email"
 jwt = JWT(app, authenticate, identity)
 
 @app.route("/")
@@ -54,3 +45,27 @@ def hello():
 @jwt_required()
 def protected():
   return '%s' % current_identity
+
+
+@app.route("/CreateUser", methods = ['POST'])
+def create_user():
+  data = request.get_json(force = True)
+  username = data["username"]
+  password = data["password"]
+  email = data["email"]
+  url = "http://graph-api/CreateUser"
+  result = requests.post(url, data = json.dumps({
+    "username": username,
+    "email": email,
+    "password": password
+  }))
+  result_dict = json.loads(result)
+  if result_dict["error"]:
+    return result
+  else:
+    return requests.post("http://localhost/auth", data = json.dumps({
+      "email": email,
+      "password": password
+    }))
+
+

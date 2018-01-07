@@ -31,7 +31,7 @@ def create_user():
   results = graph.run("MATCH (a:Person {email: {email}}) return a", {"email": email}).data()
   if results:
     return json.dumps({
-      "err": "{user} already exists.".format(user = username)
+      "error": "{user} already exists.".format(user = username)
     }), 200
   else:
     user_node = Node("User", **{
@@ -49,3 +49,22 @@ def create_user():
       return json.dumps({
         "error": "Error in creating {user} account.".format(user = username)
       }), 200
+
+
+@app.route("/GetUser", methods = ['POST'])
+def get_user():
+  data = request.get_json(force = True)
+  email = data["email"]
+  results = graph.run("MATCH (a:Person {email: {email}}) return a", {"email": email}).data()
+  if results:
+    return json.dumps({
+      "error": None,
+      "data": {
+        "email": email,
+        "password": results[0]["a"]["password"]
+      }
+    }), 200
+  else:
+    return json.dumps({
+      "error": "{user} account not found".format(user = email)
+    }), 200
