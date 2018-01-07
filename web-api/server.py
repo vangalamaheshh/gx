@@ -13,7 +13,6 @@ from werkzeug.security import safe_str_cmp
 import json
 import requests
 
-@jwt.authentication_handler
 def authenticate(email, password):
   url = "http://graph-api/GetUser"
   result = requests.post(url, data = json.dumps({
@@ -23,7 +22,6 @@ def authenticate(email, password):
   if not result_dict["error"] and safe_str_cmp(result_dict["data"]["password"].encode('utf-8'), password.encode('utf-8')):
     return result_dict["data"]["email"]
 
-@jwt.identity_handler
 def identity(payload):
   email = payload['identity']
   return {"email": email}
@@ -34,7 +32,7 @@ def identity(payload):
 app = Flask(__name__)
 app.debug = True
 app.config['SECRET_KEY'] = 'super-secret'
-JWT_AUTH_USERNAME_KEY = "email"
+app.config['JWT_AUTH_USERNAME_KEY'] = "email"
 jwt = JWT(app, authenticate, identity)
 
 @app.route("/")
