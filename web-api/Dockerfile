@@ -7,7 +7,8 @@ ENV LANG "C.UTF-8"
 
 RUN set -ex \
   && pip install flask \
-  && pip install Flask-JWT 
+  && pip install Flask-JWT \
+  && pip install requests 
 
 WORKDIR /usr/local/bin
 
