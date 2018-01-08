@@ -13,6 +13,7 @@ from flask_jwt_extended import (
     get_jwt_identity
 )
 from werkzeug.security import safe_str_cmp
+from datetime import timedelta
 import json
 import requests
 
@@ -31,6 +32,7 @@ def authenticate(email, password):
 app = Flask(__name__)
 app.debug = True
 app.config['JWT_SECRET_KEY'] = 'super-secret'
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days = 1) 
 jwt = JWTManager(app)
 
 @jwt.user_claims_loader
@@ -43,11 +45,20 @@ def add_claims_to_access_token(identity):
 def hello():
   return "Hello World!"
 
-@app.route('/protected')
-@jwt_required
-def protected():
-  user = get_jwt_identity()
-  return json.dumps({"user": user}), 200
+@app.route('/GetUser', methods = ["POST"])
+def get_user():
+  data = request.get_json(force = True)
+  email = data["email"]
+  password = data["password"]
+  authenticated = authenticate(email, password)
+  if authenticated:
+    return json.dumps({
+      "access_token": create_access_token(authenticated)
+    }), 200
+  else:
+    return json.dumps({
+      "error": "Authentication Failed."
+    }), 401
 
 
 @app.route("/CreateUser", methods = ['POST'])
@@ -70,3 +81,11 @@ def create_user():
       'access_token': create_access_token(authenticate(email, password))
     }), 200
 
+
+@app.route("/protected")
+@jwt_required
+def protected():
+  email = jwt_get_identity()
+  return json.dumps({
+    "email": email
+  }), 200
