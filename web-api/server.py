@@ -85,7 +85,7 @@ def create_user():
 @app.route("/protected")
 @jwt_required
 def protected():
-  email = jwt_get_identity()
+  email = get_jwt_identity()
   return json.dumps({
     "email": email
   }), 200
