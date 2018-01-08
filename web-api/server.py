@@ -25,12 +25,6 @@ def authenticate(email, password):
   if not result_dict["error"] and safe_str_cmp(result_dict["data"]["password"].encode('utf-8'), password.encode('utf-8')):
     return result_dict["data"]["email"]
 
-@jwt.user_claims_loader
-def add_claims_to_access_token(identity):
-  return {
-    'email': identity
-  }
-
 #------------------------#
 #    Flask methods       #
 #------------------------#
@@ -38,6 +32,12 @@ app = Flask(__name__)
 app.debug = True
 app.config['JWT_SECRET_KEY'] = 'super-secret'
 jwt = JWTManager(app)
+
+@jwt.user_claims_loader
+def add_claims_to_access_token(identity):
+  return {
+    'email': identity
+  }
 
 @app.route("/")
 def hello():
