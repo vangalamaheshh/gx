@@ -9,10 +9,15 @@
 
 from flask import Flask, request
 from flask_jwt_extended import (
-    JWTManager, jwt_required, create_access_token,
-    get_jwt_identity
+  JWTManager, 
+  jwt_required, 
+  create_access_token,
+  get_jwt_identity
 )
-from werkzeug.security import safe_str_cmp
+from werkzeug.security import (
+  generate_password_hash,
+  check_password_hash
+)
 from datetime import timedelta
 import json
 import requests
@@ -23,7 +28,7 @@ def authenticate(email, password):
     "email": email
   }))
   result_dict = json.loads(result.text)
-  if not result_dict["error"] and safe_str_cmp(result_dict["data"]["password"].encode('utf-8'), password.encode('utf-8')):
+  if not result_dict["error"] and check_password_hash(result_dict["data"]["password"], password):
     return result_dict["data"]["email"]
 
 #------------------------#
@@ -66,12 +71,13 @@ def create_user():
   data = request.get_json(force = True)
   username = data["username"]
   password = data["password"]
+  salted_pass = generate_password_hash(password)
   email = data["email"]
   url = "http://graph-api/CreateUser"
   result = requests.post(url, data = json.dumps({
     "username": username,
     "email": email,
-    "password": password
+    "password": salted_pass
   }))
   result_dict = json.loads(result.text)
   if result_dict["error"]:
