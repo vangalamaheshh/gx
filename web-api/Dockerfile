@@ -40,4 +40,6 @@ ENTRYPOINT ["/entrypoint.sh"]
 
 WORKDIR /usr/local/bin/gx/web-api
 
+ENV GMAIL_USER ""
+ENV GMAIL_PASS ""
 CMD ["/usr/bin/supervisord"]

@@ -36,24 +36,30 @@ def authenticate(email, password):
 
 
 def send_email(email):
-  # Now we'll send the email confirmation link
-  subject = "Confirm your email"
-  token = ts.dumps(email, salt = 'email-confirm-key')
-  confirm_url = url_for(
-    'confirm_email',
-    token = token,
-    _external = True
-  )
-  msg = MIMEText(confirm_url)
-  msg['Subject'] = "Confirmation email"
-  msg['From'] = "vangalamaheshh@gmail.com"
-  msg['To'] = email
-  s = smtplib.SMTP("localhost")
-  s.send_message(msg)
-  s.quit()
-  return json.dumps({
-    "msg": "confirmation email is sent"
-  }), 200
+  try:
+    # Now we'll send the email confirmation link
+    subject = "Confirm your email"
+    token = ts.dumps(email, salt = 'email-confirm-key')
+    confirm_url = url_for(
+      'confirm_email',
+      token = token,
+      _external = True
+    )
+    msg = MIMEText(confirm_url)
+    msg['Subject'] = "Confirmation email"
+    msg['From'] = os.environ["GMAIL_USER"]
+    msg['To'] = email
+    s = smtplib.SMTP("smtp.gmail.com", 587)
+    s.login(os.environ["GMAIL_USER"], os.environ["GMAIL_PASS"])
+    s.send_message(msg)
+    s.quit()
+    return json.dumps({
+      "msg": "confirmation email is sent"
+    }), 200
+  except:
+    return json.dumps({
+      "error": "Error in sending confirmation email."
+    }), 200
 
 #------------------------#
 #    Flask methods       #
