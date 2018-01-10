@@ -36,18 +36,18 @@ def authenticate(email, password):
     return result_dict["data"]["email"]
 
 
-def send_email(email):
+def send_email(email, url, subject_line):
   try:
     # Now we'll send the email confirmation link
     subject = "Confirm your email"
     token = ts.dumps(email, salt = 'email-confirm-key')
     confirm_url = url_for(
-      'confirm_email',
+      url,
       token = token,
       _external = True
     )
     msg = MIMEText(confirm_url)
-    subject = "Confirmation email"
+    subject = subject_line
     from_email = os.environ["GMAIL_USER"]
     to_email = email
     text = "\r\n".join([
@@ -66,7 +66,7 @@ def send_email(email):
     server.sendmail(from_email, to_email, text)
     server.quit()
     return json.dumps({
-      "msg": "confirmation email is sent"
+      "msg": subject_line + " is sent"
     }), 200
   except:
     return json.dumps({
@@ -127,7 +127,22 @@ def create_user():
     return result
   else:
     #send confirmation email
-    return send_email(email)
+    return send_email(email, 'confirm_email', 'Confirmation Email')
+
+@app.route("/ResetUser", methods = ['POST'])
+def reset_user():
+  data = request.get_json(force = True)
+  email = data["email"]
+  url = "http://graph-api/GetUser"
+  result = requests.post(url, data = json.dumps({
+    "email": email
+  }))
+  result_dict = json.loads(result.text)
+  if result_dict["error"]:
+    return result
+  else:
+    #send confirmation email
+    return send_email(email, 'reset_pass', 'Password Reset Email')
 
 
 @app.route("/confirm/<token>")
@@ -152,6 +167,32 @@ def confirm_email(token):
       "msg": "Account confirmed. Please login with credentials."
     }), 200
   
+
+@app.route("/reset/<token>", methods = ["POST"])
+def reset_pass(token):
+  data = request.get_json(force = True)
+  password = data["password"]
+  salted_pass = generate_password_hash(password)
+  try:
+    email = ts.loads(token, salt = "email-confirm-key", max_age = 86400)
+  except:
+    return json.dumps({
+      "error": "Error confirming email account."
+    }), 404
+  url = "http://graph-api/ResetPass"
+  result = requests.post(url, data = json.dumps({
+    "email": email,
+    "password": salted_pass
+  }))
+  result_dict = json.loads(result.text)
+  if result_dict["error"]:
+    return result
+  else:
+    # return success
+    return json.dumps({
+      "msg": "Password has been reset."
+    }), 200
+
 
 @app.route("/protected")
 @jwt_required

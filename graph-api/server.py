@@ -66,6 +66,22 @@ def confirm_email():
       "error": "{user} email confirmation failed.".format(user = email)
     }), 200
 
+@app.route('/ResetPass', methods = ['POST'])
+def reset_pass():
+  data = request.get_json(force = True)
+  email = data["email"]
+  password = data["password"]
+  results = graph.run("MATCH (a:User {email: {email}}) SET a.password = {password} return a", {"email": email, "password": password}).data()
+  if results:
+    return json.dumps({
+      "error": None
+    }), 200
+  else:
+    return json.dumps({
+      "error": "{user} password reset failed.".format(user = email)
+    }), 200
+
+
 @app.route("/GetUser", methods = ['POST'])
 def get_user():
   data = request.get_json(force = True)
