@@ -28,7 +28,7 @@ def create_user():
   username = data["username"]
   password = data["password"]
   email = data["email"]
-  results = graph.run("MATCH (a:Person {email: {email}, email_confirmed: false}) return a", {"email": email}).data()
+  results = graph.run("MATCH (a:Person {email: {email}}) return a", {"email": email}).data()
   if results:
     return json.dumps({
       "error": "{user} already exists.".format(user = username)
@@ -37,7 +37,8 @@ def create_user():
     user_node = Node("User", **{
       "email": email,
       "name": username,
-      "password": password
+      "password": password,
+      "email_confirmed": False
     })
     graph.create(user_node)
     if graph.exists(user_node):
@@ -50,6 +51,20 @@ def create_user():
         "error": "Error in creating {user} account.".format(user = username)
       }), 200
 
+
+@app.route('/ConfirmEmail', methods = ['POST'])
+def confirm_email():
+  data = request.get_json(force = True)
+  email = data["email"]
+  results = graph.run("MATCH (a:User {email: {email}}) SET a.email_confirmed = true return a", {"email": email}).data()
+  if results:
+    return json.dumps({
+      "error": None
+    }), 200   
+  else:
+    return json.dumps({
+      "error": "{user} email confirmation failed.".format(user = email)
+    }), 200
 
 @app.route("/GetUser", methods = ['POST'])
 def get_user():

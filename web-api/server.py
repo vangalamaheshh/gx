@@ -45,8 +45,8 @@ def send_email(email):
     _external = True
   )
   msg = MIMEText(confirm_url)
-  msg['Subject'] = "Confirmation email from Gx Genomics"
-  msg['From'] = "gxgenomics@gmail.com"
+  msg['Subject'] = "Confirmation email"
+  msg['From'] = "vangalamaheshh@gmail.com"
   msg['To'] = email
   s = smtplib.SMTP("localhost")
   s.send_message(msg)
