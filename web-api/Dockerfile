@@ -8,7 +8,8 @@ ENV LANG "C.UTF-8"
 RUN set -ex \
   && pip install flask \
   && pip install flask-jwt-extended \
-  && pip install requests 
+  && pip install requests \
+  && pip install itsdangerous 
 
 WORKDIR /usr/local/bin
 
