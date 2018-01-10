@@ -128,7 +128,7 @@ def confirm_email():
   result_dict = json.loads(result.text)
   if result_dict["error"]:
     return result
-  else
+  else:
     # return success
     return json.dumps({
       "msg": "Account confirmed. Please login with credentials."
