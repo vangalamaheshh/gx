@@ -76,7 +76,8 @@ def get_user():
       "error": None,
       "data": {
         "email": email,
-        "password": results[0]["a"]["password"]
+        "password": results[0]["a"]["password"],
+        "email_confirmed": results[0]["a"]["email_confirmed"]
       }
     }), 200
   else:

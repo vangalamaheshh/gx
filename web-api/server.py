@@ -23,6 +23,7 @@ from itsdangerous import URLSafeTimedSerializer as URLSerialize
 import smtplib
 from email.mime.text import MIMEText
 import json
+import os
 import requests
 
 def authenticate(email, password):
@@ -31,30 +32,46 @@ def authenticate(email, password):
     "email": email
   }))
   result_dict = json.loads(result.text)
-  if not result_dict["error"] and result_dict["email_confirmed"] and check_password_hash(result_dict["data"]["password"], password):
+  if not result_dict["error"] and result_dict["data"]["email_confirmed"] and check_password_hash(result_dict["data"]["password"], password):
     return result_dict["data"]["email"]
 
 
 def send_email(email):
-  # Now we'll send the email confirmation link
-  subject = "Confirm your email"
-  token = ts.dumps(email, salt = 'email-confirm-key')
-  confirm_url = url_for(
-    'confirm_email',
-    token = token,
-    _external = True
-  )
-  msg = MIMEText(confirm_url)
-  msg['Subject'] = "Confirmation email"
-  msg['From'] = os.environ["GMAIL_USER"]
-  msg['To'] = email
-  s = smtplib.SMTP("smtp.gmail.com", 587)
-  s.login(os.environ["GMAIL_USER"], os.environ["GMAIL_PASS"])
-  s.send_message(msg)
-  s.quit()
-  return json.dumps({
-    "msg": "confirmation email is sent"
-  }), 200
+  try:
+    # Now we'll send the email confirmation link
+    subject = "Confirm your email"
+    token = ts.dumps(email, salt = 'email-confirm-key')
+    confirm_url = url_for(
+      'confirm_email',
+      token = token,
+      _external = True
+    )
+    msg = MIMEText(confirm_url)
+    subject = "Confirmation email"
+    from_email = os.environ["GMAIL_USER"]
+    to_email = email
+    text = "\r\n".join([
+      "From: " + from_email,
+      "To: " + to_email,
+      "Subject: " + subject,
+      "",
+      msg.as_string()
+    ])
+    server = smtplib.SMTP("smtp.gmail.com", 587)
+    server.connect("smtp.gmail.com", 587)
+    server.ehlo()
+    server.starttls()
+    server.ehlo()
+    server.login(os.environ["GMAIL_USER"], os.environ["GMAIL_PASS"])
+    server.sendmail(from_email, to_email, text)
+    server.quit()
+    return json.dumps({
+      "msg": "confirmation email is sent"
+    }), 200
+  except:
+    return json.dumps({
+      "error": "failed in confirming the email account."
+    }), 200
 
 #------------------------#
 #    Flask methods       #
@@ -114,7 +131,7 @@ def create_user():
 
 
 @app.route("/confirm/<token>")
-def confirm_email():
+def confirm_email(token):
   try:
     email = ts.loads(token, salt = "email-confirm-key", max_age = 86400)
   except:
