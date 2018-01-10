@@ -28,7 +28,7 @@ def create_user():
   username = data["username"]
   password = data["password"]
   email = data["email"]
-  results = graph.run("MATCH (a:Person {email: {email}}) return a", {"email": email}).data()
+  results = graph.run("MATCH (a:Person {email: {email}, email_confirmed: false}) return a", {"email": email}).data()
   if results:
     return json.dumps({
       "error": "{user} already exists.".format(user = username)

@@ -7,7 +7,7 @@
 # @date: Jan, 5, 2018
 #---------------------------
 
-from flask import Flask, request
+from flask import Flask, request, url_for, render_template
 from flask_jwt_extended import (
   JWTManager, 
   jwt_required, 
@@ -19,6 +19,9 @@ from werkzeug.security import (
   check_password_hash
 )
 from datetime import timedelta
+from itsdangerous import URLSafeTimedSerializer as URLSerialize
+import smtplib
+from email.mime.text import MIMEText
 import json
 import requests
 
@@ -28,8 +31,29 @@ def authenticate(email, password):
     "email": email
   }))
   result_dict = json.loads(result.text)
-  if not result_dict["error"] and check_password_hash(result_dict["data"]["password"], password):
+  if not result_dict["error"] and result_dict["email_confirmed"] and check_password_hash(result_dict["data"]["password"], password):
     return result_dict["data"]["email"]
+
+
+def send_email(email):
+  # Now we'll send the email confirmation link
+  subject = "Confirm your email"
+  token = ts.dumps(email, salt = 'email-confirm-key')
+  confirm_url = url_for(
+    'confirm_email',
+    token = token,
+    _external = True
+  )
+  msg = MIMEText(confirm_url)
+  msg['Subject'] = "Confirmation email from Gx Genomics"
+  msg['From'] = "gxgenomics@gmail.com"
+  msg['To'] = email
+  s = smtplib.SMTP("localhost")
+  s.send_message(msg)
+  s.quit()
+  return json.dumps({
+    "msg": "confirmation email is sent"
+  }), 200
 
 #------------------------#
 #    Flask methods       #
@@ -38,6 +62,7 @@ app = Flask(__name__)
 app.debug = True
 app.config['JWT_SECRET_KEY'] = 'super-secret'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(days = 1) 
+ts = URLSerialize(app.config['JWT_SECRET_KEY'])
 jwt = JWTManager(app)
 
 @jwt.user_claims_loader
@@ -83,10 +108,32 @@ def create_user():
   if result_dict["error"]:
     return result
   else:
-    return json.dumps({
-      'access_token': create_access_token(authenticate(email, password))
-    }), 200
+    #send confirmation email
+    return send_email(email)
 
+
+@app.route("/confirm/<token>")
+def confirm_email():
+  try:
+    email = ts.loads(token, salt = "email-confirm-key", max_age = 86400)
+  except:
+    return json.dumps({
+      "error": "Error confirming email account."
+    }), 404
+  # flip neo4j email_confirmed property to True
+  url = "http://graph-api/ConfirmEmail"
+  result = requests.post(url, data = json.dumps({
+    "email": email
+  }))
+  result_dict = json.loads(result.text)
+  if result_dict["error"]:
+    return result
+  else
+    # return success
+    return json.dumps({
+      "msg": "Account confirmed. Please login with credentials."
+    }), 200
+  
 
 @app.route("/protected")
 @jwt_required
