@@ -11,7 +11,7 @@ authorizer = APIAuth()
 handler = FTPHandler
 handler.authorizer = authorizer
 handler.permit_foreign_addresses = True
-handler.passive_ports = range(60000, 65000)
+handler.passive_ports = range(60000, 60100)
 
 logging.basicConfig(filename='/var/log/pyftpd.log', level=logging.INFO)
 
