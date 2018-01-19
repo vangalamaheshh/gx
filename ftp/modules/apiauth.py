@@ -51,7 +51,7 @@ class APIAuth(DummyAuthorizer):
         self.auth_api + "/GetUser",
         method = "POST",
         body = json.dumps({
-          "username": username,
+          "email": username,
           "password": password
         })
       )
