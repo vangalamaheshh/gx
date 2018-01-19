@@ -10,6 +10,7 @@ from tornado.httpclient import HTTPRequest, HTTPClient
 class APIAuth(DummyAuthorizer):
   read_perms = "el"
   write_perms = "adfmwMT"
+  req_perms = "lawMT"
   auth_api = os.environ["AUTH_API"]
   http_client = HTTPClient()
 
@@ -21,7 +22,8 @@ class APIAuth(DummyAuthorizer):
     if not isinstance(homedir, unicode):
       homedir = homedir.decode('utf8')
     if not os.path.isdir(homedir):
-      raise ValueError('no such directory: %r' % homedir)
+      #raise ValueError('no such directory: %r' % homedir)
+      os.makedirs(homedir, mode = 0o777)
     homedir = os.path.realpath(homedir)
     self._check_permissions(username, perm)
     dic = {
@@ -58,7 +60,7 @@ class APIAuth(DummyAuthorizer):
       try:
         json_data = json.loads(self.http_client.fetch(http_req).body)
         if json_data:
-          self.add_user(username, password, "/tmp", perm = self.write_perms)
+          self.add_user(username, password, "/tmp" + "/" + username, perm = self.req_perms)
           return None
         else:
           return msg
