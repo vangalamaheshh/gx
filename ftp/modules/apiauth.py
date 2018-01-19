@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #vim: syntax=python tabstop=2 expandtab
 
-from authorizers import DummyAuthorizer
+from pyftpdlib.authorizers import DummyAuthorizer
 import os
 from pyftpdlib._compat import unicode
 from tornado.httpclient import HTTPRequest, AsyncHTTPClient
@@ -45,4 +45,4 @@ class APIAuth(DummyAuthorizer):
 
   def validate_authentication(self, username, password, handler):
     msg = "Authentication failed."
-    
+    return None
