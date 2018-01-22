@@ -9,7 +9,8 @@ RUN set -ex \
 
 RUN set -ex \
   && pip install tornado \
-  && pip install google-cloud-storage=1.7.0
+#  && pip install google-cloud-storage==1.6.0
+  && conda install -y -c conda-forge google-cloud-storage=1.6.0
 
 RUN set -ex \
   && git clone https://github.com/vangalamaheshh/gx.git
