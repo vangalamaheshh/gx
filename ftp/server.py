@@ -2,16 +2,17 @@
 #vim: syntax=python tabstop=4 expandtab
 
 import logging
-
-from pyftpdlib.handlers import FTPHandler
+import os
 from pyftpdlib.servers import FTPServer
 from modules.apiauth import APIAuth
+from modules.gcphandler import GCPHandler
 
 authorizer = APIAuth()
-handler = FTPHandler
+handler = GCPHandler
 handler.authorizer = authorizer
 handler.permit_foreign_addresses = True
-handler.passive_ports = range(60000, 60100)
+handler.masquerade_address = os.environ["PUBLIC_IP"]
+handler.passive_ports = range(60000, 60999)
 
 logging.basicConfig(filename='/var/log/pyftpd.log', level=logging.INFO)
 

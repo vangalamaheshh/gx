@@ -8,14 +8,15 @@ RUN set -ex \
   && python setup.py install
 
 RUN set -ex \
-  && pip install tornado
+  && pip install tornado \
+  && pip install google-cloud-storage=1.7.0
 
-RUN echo "Force"
 RUN set -ex \
   && git clone https://github.com/vangalamaheshh/gx.git
 
 EXPOSE 21
-EXPOSE 60000-60100
 
 ENV AUTH_API ""
+ENV PUBLIC_IP ""
+ENV FTP_BUCKET ""
 CMD ["python", "/usr/local/bin/gx/ftp/server.py"]
