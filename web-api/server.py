@@ -68,9 +68,9 @@ def send_email(email, url, subject_line):
     return json.dumps({
       "msg": subject_line + " is sent"
     }), 200
-  except:
+  except Exception as e:
     return json.dumps({
-      "error": "failed in confirming the email account."
+      "error": str(e)
     }), 200
 
 #------------------------#
