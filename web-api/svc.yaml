@@ -1,12 +1,12 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: neo4j
+  name: web-api 
 spec:
   selector:
-    app: neo4j
+    app: web-api
   ports:
     - protocol: TCP
-      port: 7474
-      targetPort: 7474
+      port: 80
+      targetPort: 80
   type: ClusterIP

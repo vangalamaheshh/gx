@@ -19,11 +19,11 @@ spec:
         - containerPort: 7474
         - containerPort: 7687
         - containerPort: 7473
-        volumeMounts:
-        - mountPath: /data
-          name: neo4j-volume
-      volumes:
-      - name: neo4j-volume
-        gcePersistentDisk:
-          pdName: neo4j-disk
-          fsType: ext4
+#        volumeMounts:
+#        - mountPath: /data
+#          name: neo4j-volume
+#      volumes:
+#      - name: neo4j-volume
+#        gcePersistentDisk:
+#          pdName: neo4j-disk
+#          fsType: ext4

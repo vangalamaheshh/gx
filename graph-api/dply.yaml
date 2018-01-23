@@ -1,0 +1,19 @@
+apiVersion: apps/v1beta1 # for versions before 1.6.0 use extensions/v1beta1
+kind: Deployment
+metadata:
+  name: graph-api 
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: graph-api
+    spec:
+      containers:
+      - name: graphapi
+        image: docker.io/mvangala/gx-graph-api:latest
+        env:
+        - name: NEO4J_PASSWORD
+          value: graphdb
+        ports:
+        - containerPort: 80

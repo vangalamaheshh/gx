@@ -1,0 +1,21 @@
+apiVersion: apps/v1beta1 # for versions before 1.6.0 use extensions/v1beta1
+kind: Deployment
+metadata:
+  name: web-api 
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: web-api
+    spec:
+      containers:
+      - name: webapi
+        image: docker.io/mvangala/gx-web-api:latest
+        env:
+        - name: GMAIL_USER
+          value: 
+        - name: GMAIL_PASS
+          value: 
+        ports:
+        - containerPort: 80

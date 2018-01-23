@@ -1,0 +1,35 @@
+apiVersion: apps/v1beta1 # for versions before 1.6.0 use extensions/v1beta1
+kind: Deployment
+metadata:
+  name: ftp 
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: ftp
+    spec:
+      containers:
+      - name: ftp
+        image: docker.io/mvangala/ftp:latest
+        env:
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /etc/gx/gmx.json
+        - name: AUTH_API
+          value: "http://web-api"
+        - name: FTP_BUCKET
+          value: "ftp-uploads"
+        - name: PUBLIC_IP
+          value: "" 
+        ports:
+        - containerPort: 21
+        - containerPort: 60000
+        - containerPort: 60001
+        volumeMounts:
+        - name: gx-secrets
+          mountPath: "/etc/gx"
+          readOnly: true
+      volumes:
+      - name: gx-secrets
+        secret:
+          secretName: gmx

@@ -1,0 +1,21 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: ftp 
+spec:
+  selector:
+    app: ftp
+  ports:
+    - protocol: TCP
+      name: serverport
+      port: 21
+      targetPort: 21
+    - protocol: TCP
+      name: portrange
+      port: 60000
+      targetPort: 60000
+    - protocol: TCP
+      name: portrangetwo
+      port: 60001
+      targetPort: 60001
+  type: LoadBalancer
