@@ -16,7 +16,7 @@ RUN set -ex \
   && git clone https://github.com/vangalamaheshh/gx.git
 
 EXPOSE 21
-
+EXPOSE 60000-60001
 ENV AUTH_API ""
 ENV PUBLIC_IP ""
 ENV FTP_BUCKET ""
